@@ -9,7 +9,12 @@ class OTPVerificationScreen extends StatefulWidget {
   final String token;
   final Map<String, dynamic> user;
 
-  OTPVerificationScreen({required this.email, required this.generatedOtp, required this.token, required this.user});
+  const OTPVerificationScreen(
+      {super.key,
+      required this.email,
+      required this.generatedOtp,
+      required this.token,
+      required this.user});
 
   @override
   _OTPVerificationScreenState createState() => _OTPVerificationScreenState();
@@ -28,7 +33,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   }
 
   void _startCountdown() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_secondsRemaining > 0) {
         setState(() {
           _secondsRemaining--;
@@ -68,7 +73,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message, style: TextStyle(color: Colors.white)),
+        content: Text(message, style: const TextStyle(color: Colors.white)),
         backgroundColor: Colors.red,
       ),
     );
@@ -91,78 +96,91 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // App Logo
-            Image.asset('assets/logo.png', height: 100), 
-            SizedBox(height: 20),
+            Image.asset('assets/logo.png', height: 100),
+            const SizedBox(height: 20),
 
             // Title
             Text(
               'OTP Verification',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green[800]),
+              style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green[800]),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
 
             // Instruction Text
             Text(
               'Enter the OTP sent to\n${widget.email}',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, color: Colors.black54),
+              style: const TextStyle(fontSize: 16, color: Colors.black54),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Countdown Timer
             Text(
               'OTP expires in ${(_secondsRemaining ~/ 60).toString().padLeft(2, '0')}:${(_secondsRemaining % 60).toString().padLeft(2, '0')}',
-              style: TextStyle(fontSize: 16, color: Colors.redAccent, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.redAccent,
+                  fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // OTP Input Field
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               child: TextField(
                 controller: _otpController,
                 decoration: InputDecoration(
                   labelText: 'Enter OTP',
                   hintText: '6-digit code',
-                  labelStyle: TextStyle(color: Colors.black),
-                  prefixIcon: Icon(Icons.lock_outline, color: Colors.green),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  labelStyle: const TextStyle(color: Colors.black),
+                  prefixIcon:
+                      const Icon(Icons.lock_outline, color: Colors.green),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10)),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Colors.green),
+                    borderSide: const BorderSide(color: Colors.green),
                   ),
                 ),
                 keyboardType: TextInputType.number,
                 textAlign: TextAlign.center,
                 maxLength: 6,
-                style: TextStyle(fontSize: 24, letterSpacing: 8),
+                style: const TextStyle(fontSize: 24, letterSpacing: 8),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Verify OTP Button
             ElevatedButton(
               onPressed: _isVerifying ? null : _verifyOTP,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green[700],
-                minimumSize: Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                minimumSize: const Size(double.infinity, 50),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
               ),
               child: _isVerifying
-                  ? CircularProgressIndicator(color: Colors.white)
-                  : Text('Verify OTP', style: TextStyle(fontSize: 18, color: Colors.white)),
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text('Verify OTP',
+                      style: TextStyle(fontSize: 18, color: Colors.white)),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Resend OTP Button (Disabled if timer is running)
             TextButton(
-              onPressed: _secondsRemaining == 0 ? () => _showErrorSnackBar('Resending OTP not implemented!') : null,
+              onPressed: _secondsRemaining == 0
+                  ? () => _showErrorSnackBar('Resending OTP not implemented!')
+                  : null,
               child: Text(
                 'Resend OTP',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: _secondsRemaining == 0 ? Colors.green[700] : Colors.grey,
+                  color:
+                      _secondsRemaining == 0 ? Colors.green[700] : Colors.grey,
                 ),
               ),
             ),

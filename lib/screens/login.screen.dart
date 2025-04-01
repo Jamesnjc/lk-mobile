@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,6 +12,8 @@ import 'register.screen.dart';
 import 'otp.screen.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -22,66 +25,77 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _generatedOtp;
 
   Future<void> _login() async {
-  setState(() {
-    _isLoading = true;
-  });
-
-  final String email = _emailController.text.trim();
-  final String password = _passwordController.text.trim();
-
-  try {
-    final response = await http.post(
-      Uri.parse('${Config.apiUrl}/api/users/login'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email, 'password': password}),
-    );
-
-    if (response.statusCode == 200) {
-      final responseData = jsonDecode(response.body);
-      final token = responseData['token'];
-      final user = responseData['user'];
-
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', token);
-      await prefs.setString('userId', user['id']);
-      await prefs.setString('username', user['username']);
-      await prefs.setString('email', user['email']);
-      await prefs.setString('role', user['role']);
-
-      print("Token stored: $token");
-      print("Stored user ID: ${user['id']}");
-      print("Stored username: ${user['username']}");
-      print('Saved email: ${user['email']}');
-      print('Saved role: ${user['role']}');
-
-      // Generate OTP
-      final otp = _generateOtp();
-      _generatedOtp = otp;
-
-      // Send OTP via Email
-      await _sendOtpEmail(email, otp);
-
-      // Navigate to OTP Verification Screen
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => OTPVerificationScreen(email: email, generatedOtp: otp, token: token, user: user),
-        ),
-      );
-    } else {
-      final responseData = jsonDecode(response.body);
-      final errorMessage = responseData['error'] ?? 'Login failed. Please try again.';
-      _showErrorSnackBar(errorMessage);
-    }
-  } catch (e) {
-    _showErrorSnackBar('An unexpected error occurred. Please try again.');
-  } finally {
     setState(() {
-      _isLoading = false;
+      _isLoading = true;
     });
-  }
-}
 
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
+
+    try {
+      final response = await http.post(
+        Uri.parse('${Config.apiUrl}/api/users/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'password': password}),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        final token = responseData['token'];
+        final user = responseData['user'];
+
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', token);
+        await prefs.setString('userId', user['id']);
+        await prefs.setString('username', user['username']);
+        await prefs.setString('email', user['email']);
+        await prefs.setString('role', user['role']);
+
+        if (kDebugMode) {
+          print("Token stored: $token");
+        }
+        if (kDebugMode) {
+          print("Stored user ID: ${user['id']}");
+        }
+        if (kDebugMode) {
+          print("Stored username: ${user['username']}");
+        }
+        if (kDebugMode) {
+          print('Saved email: ${user['email']}');
+        }
+        if (kDebugMode) {
+          print('Saved role: ${user['role']}');
+        }
+
+        // Generate OTP
+        final otp = _generateOtp();
+        _generatedOtp = otp;
+
+        // Send OTP via Email
+        await _sendOtpEmail(email, otp);
+
+        // Navigate to OTP Verification Screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => OTPVerificationScreen(
+                email: email, generatedOtp: otp, token: token, user: user),
+          ),
+        );
+      } else {
+        final responseData = jsonDecode(response.body);
+        final errorMessage =
+            responseData['error'] ?? 'Login failed. Please try again.';
+        _showErrorSnackBar(errorMessage);
+      }
+    } catch (e) {
+      _showErrorSnackBar('An unexpected error occurred. Please try again.');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   /// Generates a 6-digit OTP
   String _generateOtp() {
@@ -100,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     final message = Message()
-      ..from = Address(Config.smtpUsername, "Luntiang Kamay")
+      ..from = const Address(Config.smtpUsername, "Luntiang Kamay")
       ..recipients.add(email)
       ..subject = "Login: Verification Code"
       ..html = """
@@ -123,16 +137,22 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final sendReport = await send(message, smtpServer);
-      print('OTP Sent: ${sendReport.toString()}');
+      if (kDebugMode) {
+        print('OTP Sent: ${sendReport.toString()}');
+      }
     } catch (e) {
-      print('Error sending OTP: $e');
+      if (kDebugMode) {
+        print('Error sending OTP: $e');
+      }
       _showErrorSnackBar('Failed to send OTP. Please try again.');
     }
   }
 
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message, style: TextStyle(color: Colors.white)), backgroundColor: Colors.red),
+      SnackBar(
+          content: Text(message, style: const TextStyle(color: Colors.white)),
+          backgroundColor: Colors.red),
     );
   }
 
@@ -148,15 +168,18 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               // Logo Image
               Image.asset('assets/logo.png', height: 100),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
 
               // Title
-              Text(
+              const Text(
                 'Login into your account',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
+                style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
 
               // Email Field
               TextField(
@@ -164,13 +187,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: InputDecoration(
                   labelText: 'Email',
                   hintText: 'Enter your email',
-                  labelStyle: TextStyle(color: Colors.black),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.black)),
+                  labelStyle: const TextStyle(color: Colors.black),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.black)),
                 ),
                 keyboardType: TextInputType.emailAddress,
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
               // Password Field
               TextField(
@@ -178,36 +204,48 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: InputDecoration(
                   labelText: 'Password',
                   hintText: 'Enter your password',
-                  labelStyle: TextStyle(color: Colors.black),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.black)),
+                  labelStyle: const TextStyle(color: Colors.black),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: Colors.black)),
                 ),
                 obscureText: true,
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
 
               // Submit Button
               ElevatedButton(
                 onPressed: _isLoading ? null : _login,
-                style: ElevatedButton.styleFrom(minimumSize: Size(double.infinity, 50), backgroundColor: Colors.green),
-                child: _isLoading ? CircularProgressIndicator(color: Colors.white) : Text('Submit'),
+                style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 50),
+                    backgroundColor: Colors.green),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text('Submit'),
               ),
 
-              SizedBox(height: 16), // Add spacing before the register button
+              const SizedBox(
+                  height: 16), // Add spacing before the register button
 
               // Register Navigation
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("Don't have an account?", style: TextStyle(color: Colors.black)),
+                  const Text("Don't have an account?",
+                      style: TextStyle(color: Colors.black)),
                   TextButton(
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => RegisterScreen()),
+                        MaterialPageRoute(
+                            builder: (context) => RegisterScreen()),
                       );
                     },
-                    child: Text('Register', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                    child: const Text('Register',
+                        style: TextStyle(
+                            color: Colors.green, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),

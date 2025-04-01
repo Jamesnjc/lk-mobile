@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mailer/mailer.dart';
@@ -6,17 +7,20 @@ import 'package:mailer/smtp_server.dart';
 import '../config.dart';
 
 class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  TextEditingController _nameController = TextEditingController();
-  TextEditingController _usernameController = TextEditingController();
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
-  TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   bool _isLoading = false;
 
@@ -32,7 +36,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     // Email content with HTML
     final message = Message()
-      ..from = Address(Config.smtpFromEmail, 'Luntiang Kamay')
+      ..from = const Address(Config.smtpFromEmail, 'Luntiang Kamay')
       ..recipients.add(email)
       ..subject = 'Welcome to Luntiang Kamay!'
       ..html = '''
@@ -114,14 +118,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       final sendReport = await send(message, smtpServer);
-      print('Email sent successfully: $sendReport');
+      if (kDebugMode) {
+        print('Email sent successfully: $sendReport');
+      }
     } on MailerException catch (e) {
-      print('Failed to send email: $e');
+      if (kDebugMode) {
+        print('Failed to send email: $e');
+      }
       for (var p in e.problems) {
-        print('Problem: ${p.code}: ${p.msg}');
+        if (kDebugMode) {
+          print('Problem: ${p.code}: ${p.msg}');
+        }
       }
     } catch (e) {
-      print('Unexpected error: $e');
+      if (kDebugMode) {
+        print('Unexpected error: $e');
+      }
     }
   }
 
@@ -150,17 +162,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
 
         if (response.statusCode == 201) {
-          print("Registration Successful: ${response.body}");
+          if (kDebugMode) {
+            print("Registration Successful: ${response.body}");
+          }
           showDialog(
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                title: Text("Success"),
-                content: Text("Registration Successful! Welcome to Luntiang Kamay."),
+                title: const Text("Success"),
+                content: const Text(
+                    "Registration Successful! Welcome to Luntiang Kamay."),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text("OK"),
+                    child: const Text("OK"),
                   ),
                 ],
               );
@@ -171,21 +186,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Navigator.pop(context);
         } else {
           try {
-            final Map<String, dynamic> responseData = json.decode(response.body);
-            final errorMessage = responseData['error'] ?? 'An unknown error occurred.';
-            print("Error: $errorMessage");
+            final Map<String, dynamic> responseData =
+                json.decode(response.body);
+            final errorMessage =
+                responseData['error'] ?? 'An unknown error occurred.';
+            if (kDebugMode) {
+              print("Error: $errorMessage");
+            }
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text("Error: $errorMessage")),
             );
           } catch (e) {
-            print("Non-JSON response received: ${response.body}");
+            if (kDebugMode) {
+              print("Non-JSON response received: ${response.body}");
+            }
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text("Unexpected error: ${response.body}")),
             );
           }
         }
       } catch (error) {
-        print("An error occurred: $error");
+        if (kDebugMode) {
+          print("An error occurred: $error");
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("An error occurred: $error")),
         );
@@ -203,7 +226,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       backgroundColor: Colors.white,
       body: Center(
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Form(
             key: _formKey,
             child: Column(
@@ -213,8 +236,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   'assets/logo.png',
                   height: 100,
                 ),
-                SizedBox(height: 16),
-                Text(
+                const SizedBox(height: 16),
+                const Text(
                   'Register into Luntiang Kamay',
                   style: TextStyle(
                     fontSize: 24,
@@ -223,19 +246,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 32),
+                const SizedBox(height: 32),
                 TextFormField(
                   controller: _nameController,
                   decoration: InputDecoration(
                     labelText: 'Full Name',
                     hintText: 'Enter your full name',
-                    labelStyle: TextStyle(color: Colors.green),
+                    labelStyle: const TextStyle(color: Colors.green),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.green),
+                      borderSide: const BorderSide(color: Colors.green),
                     ),
                   ),
                   validator: (value) {
@@ -245,19 +268,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     return null;
                   },
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _usernameController,
                   decoration: InputDecoration(
                     labelText: 'Username',
                     hintText: 'This is your public display name.',
-                    labelStyle: TextStyle(color: Colors.green),
+                    labelStyle: const TextStyle(color: Colors.green),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.green),
+                      borderSide: const BorderSide(color: Colors.green),
                     ),
                   ),
                   validator: (value) {
@@ -267,43 +290,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     return null;
                   },
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _emailController,
                   decoration: InputDecoration(
                     labelText: 'Email',
                     hintText: 'This is your public email.',
-                    labelStyle: TextStyle(color: Colors.green),
+                    labelStyle: const TextStyle(color: Colors.green),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.green),
+                      borderSide: const BorderSide(color: Colors.green),
                     ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter an email';
-                    } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                    } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                        .hasMatch(value)) {
                       return 'Please enter a valid email';
                     }
                     return null;
                   },
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
                   decoration: InputDecoration(
                     labelText: 'Password',
                     hintText: 'Enter your password',
-                    labelStyle: TextStyle(color: Colors.green),
+                    labelStyle: const TextStyle(color: Colors.green),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.green),
+                      borderSide: const BorderSide(color: Colors.green),
                     ),
                   ),
                   obscureText: true,
@@ -316,19 +340,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     return null;
                   },
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _confirmPasswordController,
                   decoration: InputDecoration(
                     labelText: 'Repeat Password',
                     hintText: 'Confirm your password',
-                    labelStyle: TextStyle(color: Colors.green),
+                    labelStyle: const TextStyle(color: Colors.green),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.green),
+                      borderSide: const BorderSide(color: Colors.green),
                     ),
                   ),
                   obscureText: true,
@@ -341,10 +365,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     return null;
                   },
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(
+                  child: const Text(
                     'Already have an account? Login',
                     style: TextStyle(
                       color: Colors.green,
@@ -358,14 +382,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     onPressed: _isLoading ? null : _register,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
-                      padding: EdgeInsets.symmetric(vertical: 16),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                     child: _isLoading
-                        ? CircularProgressIndicator(color: Colors.white)
-                        : Text(
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text(
                             'Submit',
                             style: TextStyle(fontSize: 16, color: Colors.white),
                           ),
